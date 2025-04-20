@@ -16,7 +16,7 @@ const Board = dynamic(() => import('../BoardView/index'), {
 
 
 const Project = ({params} : ProjectProps) => {
-  const id = params.id
+  const id = params?.id
   const [activeTab, setActiveTab] = useState<string>('Board')
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState<boolean>(false);
     return (

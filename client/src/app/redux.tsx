@@ -1,13 +1,14 @@
-'use client'
-import { useRef } from "react";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+'use client';
+
+import { useRef } from 'react';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import {
   TypedUseSelectorHook,
   useDispatch,
   useSelector,
   Provider,
-} from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
+} from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import {
   persistReducer,
   persistStore,
@@ -17,34 +18,41 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from "redux-persist";
-import { Storage } from "redux-persist";
-import { api } from "./state/api"; // Ensure correct path
-import globalReducer from "./state/index"; // Ensure this is imported
-import createWebStorage from "redux-persist/es/storage/createWebStorage";
+} from 'redux-persist';
+import { api } from './state/api';
+import globalReducer from './state/index';
+import createWebStorage from 'redux-persist/es/storage/createWebStorage';
 
-// Fallback storage for SSR (Next.js)
-const createNoopStorage = () => {
+const createNoopStorage = (): Storage => {
   return {
-    getItem(_key: any) {
-      return Promise.resolve(null);
+    getItem(_: string): string | null {
+      return null;
     },
-    setItem(_key: any, value: any) {
-      return Promise.resolve(value);
+    setItem(_: string, __: string): void {
+      // no-op
     },
-    removeItem(_key: any) {
-      return Promise.resolve();
+    removeItem(_: string): void {
+      // no-op
+    },
+    key(_: number): string | null {
+      return null;
+    },    
+    length: 0,
+    clear(): void {
+      // no-op
     },
   };
 };
 
+
+// Use localStorage on client, noopStorage on server
 const storage =
-  typeof window !== "undefined" ? createWebStorage("local") : createNoopStorage();
+  typeof window !== 'undefined' ? createWebStorage('local') : createNoopStorage();
 
 const persistConfig = {
-  key: "root",
+  key: 'root',
   storage,
-  whitelist: ["global"], // Only persist 'globalReducer'
+  whitelist: ['global'],
 };
 
 const rootReducer = combineReducers({
@@ -66,10 +74,10 @@ const makeStore = () =>
   });
 
 export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore["getState"]>;
-export type AppDispatch = AppStore["dispatch"];
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];
 
-/* Custom Hooks */
+/** Typed hooks */
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 

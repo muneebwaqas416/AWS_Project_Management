@@ -20,9 +20,9 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: ModalNewTaskProps) => {
   const [authorUserId, setAuthorUserId] = useState("");
   const [assignedUserId, setAssignedUserId] = useState("");
   const [projectId, setProjectId] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-
+  const users : User[] = [];
+  const projects : Project[] = [];
+  
   const fetchProjects = async ()=>{
     try {
         

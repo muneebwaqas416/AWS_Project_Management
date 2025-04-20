@@ -21,7 +21,6 @@ const DashboardLayout = ({children} : {children : React.ReactNode}) => {
   
     // Force a repaint to apply dark mode
     document.documentElement.style.display = 'none';
-    document.documentElement.offsetHeight; // Force reflow
     document.documentElement.style.display = '';
   }, [isDarkMode]);  
   return (

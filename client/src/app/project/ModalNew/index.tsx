@@ -26,7 +26,7 @@ const ModalNewProject : React.FC<ModalNewProjectProps> = ({isOpen , onClose}) =>
       representation: "complete",
     });
 
-    const res = await createProject({
+    await createProject({
       name: projectName,
       description,
       startDate: formattedStartDate,

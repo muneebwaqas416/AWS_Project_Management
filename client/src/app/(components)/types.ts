@@ -2,7 +2,7 @@ import { Task } from "../state/types"
 
 export type HeaderProps = {
     name : string,
-    buttonComponent? : any,
+    buttonComponent? : React.ReactNode,
     isSmallText? : boolean
 }
 

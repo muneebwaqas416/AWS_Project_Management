@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { BoardProps, TaskColumnProps, TaskProps } from '../types'
 import { useGetTasksQuery, useUpdateTaskStatusMutation } from '@/app/state/api'
-import { DndProvider, useDrag, useDrop } from 'react-dnd'
+import { DndProvider, DragLayerMonitor, DropTargetMonitor, useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Task as TaskTypes } from '@/app/state/types'
 import { statusColor, taskStatus } from '../constants'
@@ -21,7 +21,7 @@ const TaskColumn = ({
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
     drop: (item: { id: number }) => moveTask(item.id, status),
-    collect: (monitor: any) => ({
+    collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
     }),
   }));
@@ -81,7 +81,7 @@ const Task = ({ task }: TaskProps) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'task',
     item: { id: task.id },
-    collect: (monitor: any) => ({
+    collect: (monitor: DragLayerMonitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
@@ -222,57 +222,34 @@ const Task = ({ task }: TaskProps) => {
 };
 
 const Board = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
-  const [isLocalLoading, setIsLocalLoading] = useState<boolean>();
+  const [isLocalLoading, setIsLocalLoading] = useState<boolean>(true);
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
-  
-  if (typeof window !== 'undefined' && !id) {
-    return <div>Loading project ID...</div>;
-  }
 
   const projectId = Number(id);
-  if (typeof window !== 'undefined' && isNaN(projectId)) {
-    return <div>Error: Invalid project ID</div>;
-  }
 
-  const { 
-    data: tasks, 
-    isLoading, 
-    error, 
+  const {
+    data: tasks,
+    isLoading,
+    error,
     refetch,
     isFetching,
     isSuccess
   } = useGetTasksQuery(
-    { projectId: Number(id) || 0 },
+    { projectId },
     {
       refetchOnMountOrArgChange: true,
-      skip: !id || isNaN(Number(id))
+      skip: !id || isNaN(projectId),
     }
   );
 
-  // Update loading state based on query status
   useEffect(() => {
-    if (isSuccess) {
-      setIsLocalLoading(false);
-    } else if (error) {
+    if (isSuccess || error) {
       setIsLocalLoading(false);
     }
   }, [isSuccess, error]);
 
-  const moveTask = async (taskId: number, toStatus: string) => {
-    try {
-      setIsLocalLoading(true);
-      await updateTaskStatus({ taskId, status: toStatus });
-      await refetch();
-    } catch (err) {
-      console.error('Mutation error:', err);
-    } finally {
-      setIsLocalLoading(false);
-    }
-  };
-
   useEffect(() => {
-    setIsLocalLoading(false)
-    //setMounted(true);
+    setIsLocalLoading(false);
   }, []);
 
   useEffect(() => {
@@ -286,43 +263,49 @@ const Board = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
     }
   }, [tasks, isLoading, isLocalLoading, isFetching]);
 
-  // Use client-side only rendering for loading states
-  if (typeof window !== 'undefined' && isLocalLoading) {
-    return <div>Loading tasks...</div>;
-  }
-  
-  if (typeof window !== 'undefined' && error) {
-    return <div>Error loading tasks</div>;
+  const moveTask = async (taskId: number, toStatus: string) => {
+    try {
+      setIsLocalLoading(true);
+      await updateTaskStatus({ taskId, status: toStatus });
+      await refetch();
+    } catch (err) {
+      console.error('Mutation error:', err);
+    } finally {
+      setIsLocalLoading(false);
+    }
+  };
+
+  const displayTasks = tasks || [];
+
+  // Conditional rendering instead of early returns
+  if (typeof window !== 'undefined' && (!id || isNaN(projectId))) {
+    return <div>Error: Invalid or missing project ID</div>;
   }
 
-  if (isLocalLoading) {
+  if (isLoading || isLocalLoading || isFetching) {
     return <div className="p-4">Loading tasks...</div>;
   }
-  
+
   if (error) {
     return <div className="p-4">Error loading tasks</div>;
   }
 
-  const displayTasks = tasks || [];
-  
   return (
-    <div className="" suppressHydrationWarning={true}>
-        <DndProvider backend={HTML5Backend} >
-      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
-        {taskStatus.map((status) => (
-          <TaskColumn
-            key={status}
-            status={status}
-            tasks={displayTasks}
-            moveTask={moveTask}
-            setIsModalNewTaskOpen={setIsModalNewTaskOpen}
-          />
-        ))}
-      </div>
-    </DndProvider>
+    <div suppressHydrationWarning={true}>
+      <DndProvider backend={HTML5Backend}>
+        <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
+          {taskStatus.map((status) => (
+            <TaskColumn
+              key={status}
+              status={status}
+              tasks={displayTasks}
+              moveTask={moveTask}
+              setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+            />
+          ))}
+        </div>
+      </DndProvider>
     </div>
-    
   );
 };
-
 export default Board;
