@@ -23,27 +23,19 @@ import { api } from './state/api';
 import globalReducer from './state/index';
 import createWebStorage from 'redux-persist/es/storage/createWebStorage';
 
-const createNoopStorage = (): Storage => {
+const createNoopStorage = () => {
   return {
-    getItem(_: string): string | null {
-      return null;
+    getItem(_key: string) {
+      return Promise.resolve(null);
     },
-    setItem(_: string, __: string): void {
-      // no-op
+    setItem(_key: string, value: any) {
+      return Promise.resolve(value);
     },
-    removeItem(_: string): void {
-      // no-op
-    },
-    key(_: number): string | null {
-      return null;
-    },    
-    length: 0,
-    clear(): void {
-      // no-op
+    removeItem(_key: string) {
+      return Promise.resolve();
     },
   };
 };
-
 
 // Use localStorage on client, noopStorage on server
 const storage =
@@ -52,6 +44,7 @@ const storage =
 const persistConfig = {
   key: 'root',
   storage,
+  version: 1,
   whitelist: ['global'],
 };
 
@@ -87,9 +80,19 @@ export default function StoreProvider({
   children: React.ReactNode;
 }) {
   const storeRef = useRef<AppStore | null>(null);
+  const persistorRef = useRef<ReturnType<typeof persistStore>>(null);
+  if (typeof window === 'undefined') {
+    // Server-side: Return a simple provider without PersistGate
+    const store = makeStore();
+    return <Provider store={store}>{children}</Provider>;
+  }
+
+  // Client-side only
   if (!storeRef.current) {
     storeRef.current = makeStore();
+    persistorRef.current = persistStore(storeRef.current);
   }
+
 
   const persistor = persistStore(storeRef.current);
 
