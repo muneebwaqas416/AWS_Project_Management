@@ -49,7 +49,7 @@ const Timeline : React.FC<TimeLineProps> = () => {
   if (isError || !projects)
     return <div>An error occurred while fetching projects</div>;
 
-  return (
+  return [
     <div className="max-w-full p-8">
       <header className="mb-4 flex items-center justify-between">
         <Header name="Projects Timeline" />
@@ -83,7 +83,7 @@ const Timeline : React.FC<TimeLineProps> = () => {
         </div>
       </div>
     </div>
-  );
+  ]
 };
 
 export default Timeline;
