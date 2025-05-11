@@ -1,8 +1,9 @@
 import { Task as TaskTypes } from "../state/types";
 
-export type ProjectProps = {
-    params : {id : string};
-}
+export interface ProjectProps {
+    params: { id: string };
+    searchParams?: { [key: string]: string | string[] | undefined };
+  }
 
 export type ProjectHeaderProps = {
     activeTab : string;
