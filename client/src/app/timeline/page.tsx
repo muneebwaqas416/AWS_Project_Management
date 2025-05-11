@@ -7,11 +7,10 @@ import React, { useMemo, useState } from "react";
 import { Project } from "../state/types";
 import Header from "../(components)/Header";
 import { useGetProjectsQuery } from "../state/api";
-import { TimeLineProps } from "../project/types";
 
 type TaskTypeItems = "task" | "milestone" | "project";
 
-const Timeline : React.FC<TimeLineProps> = () => {
+const Timeline = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkModeOn);
   const { data: projects , isLoading, isError } = useGetProjectsQuery();
 

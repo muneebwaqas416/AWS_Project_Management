@@ -52,8 +52,6 @@ const Project = ({params} : ProjectProps) => {
               activeTab === 'Timeline' && (
                 id && (
                   <TimeLine
-                  id={id}
-                  setIsModalNewTaskOpen={setIsModalNewTaskOpen}
                 >
                 </TimeLine>
                 )

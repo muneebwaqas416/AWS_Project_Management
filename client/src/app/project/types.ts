@@ -35,10 +35,6 @@ export type TaskColumnProps = {
     id : string;
     setIsModalNewTaskOpen : (isOpen : boolean) => void; 
   }
-export type TimeLineProps = {
-    id : string;
-    setIsModalNewTaskOpen : (isOpen : boolean) => void;
-}
 
 export type TableProps = {
     id: string;
