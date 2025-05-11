@@ -1,9 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import path from "path";
 
-const __filename = fileURLToPath(process.env.DATABASE_URL!);
 const __dirname = path.dirname(__filename);
 const prisma = new PrismaClient();
 
