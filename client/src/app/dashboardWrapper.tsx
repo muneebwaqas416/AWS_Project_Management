@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import Navbar from './(components)/Navbar';
 import Sidebar from './(components)/Sidebar';
 import StoreProvider, { useAppSelector } from './redux';
+
 const DashboardLayout = ({children} : {children : React.ReactNode}) => {
   const isSideBarCollapsed : boolean = useAppSelector((state) => {
     return state.global.isSidebarCollapsed
@@ -23,13 +24,16 @@ const DashboardLayout = ({children} : {children : React.ReactNode}) => {
     document.documentElement.style.display = 'none';
     document.documentElement.style.display = '';
   }, [isDarkMode]);  
+
   return (
-    <div className='flex min-h-screen w-full bg-gray-50 text-gray-900'>
-      <Sidebar></Sidebar>
-    <main className={`flex w-full flex-col bg-gray-50 dark:bg-gray-bg ${isSideBarCollapsed ? '' : 'md:pl-64'}`}>
-        <Navbar></Navbar>
-        {children}
-    </main>
+    <div className='fixed inset-0 flex bg-gray-50 text-gray-900'>
+      <Sidebar />
+      <div className={`flex flex-1 flex-col ${isSideBarCollapsed ? '' : 'md:pl-64'}`}>
+        <Navbar />
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
+      </div>
     </div>
   )
 }
