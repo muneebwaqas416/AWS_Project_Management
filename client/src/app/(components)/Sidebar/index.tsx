@@ -3,7 +3,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/redux'
 import { setIsSidebarcollapsed } from '@/app/state'
 import { useGetProjectsQuery } from '@/app/state/api'
-import { AlertCircle, AlertOctagon, AlertTriangle, Briefcase, ChevronDown, ChevronUp, Home, Layers3, LockIcon, LucideIcon, Search, Settings, ShieldAlert, User, Users, X } from 'lucide-react'
+import { AlertCircle, AlertOctagon, AlertTriangle, Briefcase, ChevronDown, ChevronUp, Home, Layers3, LockIcon, LucideIcon, Notebook, Search, Settings, ShieldAlert, User, Users, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -62,6 +62,7 @@ const Sidebar = () => {
           <SidebarLink icon={Settings} label="Settings" href="/settings" />
           <SidebarLink icon={User} label="Users" href="/users" />
           <SidebarLink icon={Users} label="Teams" href="/teams" />
+          <SidebarLink icon={Notebook} label="Notes" href="/notes" />
         </nav>
         </div>
         {/* Team */}

@@ -1,12 +1,14 @@
 import { createApi , fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Project, SearchResults, Task , User , Team } from "./types";
+import { supabase, getCurrentSession } from "@/lib/supabaseClient";
+import { Note } from "@/lib/supabaseClient";
 
 export const api = createApi({
     baseQuery : fetchBaseQuery({
         baseUrl : process.env.NEXT_PUBLIC_API_URL
     }),
     reducerPath : 'api',
-    tagTypes : ['Projects' , 'Tasks' , 'Users', 'Teams'],
+    tagTypes : ['Projects' , 'Tasks' , 'Users', 'Teams', 'Note'],
     endpoints : (build) => ({
         getProjects : build.query<Project[] , void>({
             query : () => 'project/findAll',
@@ -97,6 +99,104 @@ export const api = createApi({
           //     }
           //   },
           // }),
+          getNotes: build.query<Note[], void>({
+            queryFn: async () => {
+              try {
+                const { data, error } = await supabase
+                  .from('notes')
+                  .select('*')
+                  .order('created_at', { ascending: false });
+
+                if (error) {
+                  console.error('Error fetching notes:', error);
+                  throw error;
+                }
+                return { data };
+              } catch (error: any) {
+                console.error('Error in getNotes:', error);
+                return { error: error.message || 'Failed to fetch notes' };
+              }
+            },
+            providesTags: ["Note"],
+          }),
+          addNote: build.mutation<Note, { title: string; description: string }>({
+            queryFn: async ({ title, description }) => {
+              try {
+                const session = await getCurrentSession();
+                const userId = session?.user?.id || 'anonymous';
+
+                const { data, error } = await supabase
+                  .from('notes')
+                  .insert([{ 
+                    title, 
+                    description,
+                    user_id: userId
+                  }])
+                  .select()
+                  .single();
+
+                if (error) {
+                  console.error('Error adding note:', error);
+                  throw error;
+                }
+                return { data };
+              } catch (error: any) {
+                console.error('Error in addNote:', error);
+                return { error: error.message || 'Failed to add note' };
+              }
+            },
+            invalidatesTags: ["Note"],
+          }),
+          deleteNote: build.mutation<void, number>({
+            queryFn: async (id) => {
+              try {
+                const session = await getCurrentSession();
+                const userId = session?.user?.id || 'anonymous';
+
+                const { error } = await supabase
+                  .from('notes')
+                  .delete()
+                  .eq('id', id)
+                  .eq('user_id', userId);
+
+                if (error) {
+                  console.error('Error deleting note:', error);
+                  throw error;
+                }
+                return { data: undefined };
+              } catch (error: any) {
+                console.error('Error in deleteNote:', error);
+                return { error: error.message || 'Failed to delete note' };
+              }
+            },
+            invalidatesTags: ["Note"],
+          }),
+          updateNote: build.mutation<Note, { id: number; title: string; description: string }>({
+            queryFn: async ({ id, title, description }) => {
+              try {
+                const session = await getCurrentSession();
+                const userId = session?.user?.id || 'anonymous';
+
+                const { data, error } = await supabase
+                  .from('notes')
+                  .update({ title, description })
+                  .eq('id', id)
+                  .eq('user_id', userId)
+                  .select()
+                  .single();
+
+                if (error) {
+                  console.error('Error updating note:', error);
+                  throw error;
+                }
+                return { data };
+              } catch (error: any) {
+                console.error('Error in updateNote:', error);
+                return { error: error.message || 'Failed to update note' };
+              }
+            },
+            invalidatesTags: ["Note"],
+          }),
     })
 })
 
@@ -109,5 +209,9 @@ export const {
     useGetSearchResultsQuery,
     useGetUsersQuery,
     useGetTeamsQuery,
-    useGetTasksByUserIdQuery
+    useGetTasksByUserIdQuery,
+    useGetNotesQuery,
+    useAddNoteMutation,
+    useDeleteNoteMutation,
+    useUpdateNoteMutation
 } = api;
